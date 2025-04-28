@@ -15,73 +15,110 @@
 001500 DATA DIVISION.
 001600 FILE SECTION.
 001700 FD GRADES-FILE.
-001800*TODO: Define the records in the file
-001900 WORKING-STORAGE SECTION.
-002000
-002100*We will load each record into STUDENT for processing
-002200 01 STUDENT.
-002300*TODO: fill out the fields so that it matches the same structure
-002400*in as defined in the FILE SECTION
-002500
-002600*TODO: Add any nessecary variables in the WORKING-STORAGE SECTION
-002700*This table will store the 5 possible grade values
-002800*Hint: We recommend using OCCURS Clause in the file record
-002900 01 POSSIBLE_GRADES PIC A OCCURS 5 TIMES.
-003000*Table storing the frequency of each letter grade
-003100 01 GRADE_FREQUENCIES PIC 9(4) VALUE 0 OCCURS 5 TIMES.
-003200*The name of the file (which will be retrieved from the user)
-003300 01 FILENAME PIC X(64).
-003400
-003500 PROCEDURE DIVISION.
-003600*MAIN Paragraph, execution starts here
-003700 MAIN.
-003800     PERFORM SET-GRADES.
-003900     DISPLAY "Enter the filename: " WITH NO ADVANCING.
-004000     ACCEPT FILENAME.
-004100     PERFORM GET-ENTRIES.
-004200     PERFORM DISPLAY-FREQUENCIES.
-004300     STOP RUN.
-004400
-004500*Repeatedly ask the user to enter the names of students
-004600*and process each valid student
-004700 GET-ENTRIES.
-004800     OPEN INPUT GRADES-FILE.
-004900*    TODO: Repeatedly ask the user for names until they enter 0
-005000*    (You should PERFORM the LOOKUP-STUDENT here)
-005100     CLOSE GRADES-FILE.
-005200
-005300*Process the record only if it is in the file
-005400 LOOKUP-STUDENT.
-005500*    TODO: fix the following line
-005600     MOVE ??? TO STUDENT-RECORD-NAME
-005700     READ GRADES-FILE INTO STUDENT
-005800         KEY IS STUDENT-RECORD-NAME
-005900             INVALID KEY
-006000*                TODO: Your code here
-006100             NOT INVALID key
-006200*                TODO: Your code here
-006300     END-READ.
-006400
-006500*Calculates the average grade for the current student and
-006600*Updates the letter grade frequency
-006700 PROCESS-RECORD.
-006800     PERFORM AVERAGE.
-006900     DISPLAY "Average: " AVERAGE-GRADE "%".
-007000*    TODO: Update the appropriate letter grade frequency
-007100
-007200*TODO: Create the AVERAGE paragraph
-007300*Calculates the average grade for the current student
-007400 AVERAGE.
+001800 01 GRADES-RECORD.
+001900     05 STUDENT-RECORD-NAME PIC X(8).
+002000     05 STUDENT-GRADES OCCURS 8 TIMES PIC 9(4).
+002100
+002200 WORKING-STORAGE SECTION.
+002300 01 STUDENT.
+002400     05 STUDENT-NAME PIC X(8).
+002500     05 STUDENT-GRADE-VALUES OCCURS 8 TIMES PIC 9(4).
+002600
+002700 01 INPUT-NAME PIC X(8).
+002800 01 AVERAGE-GRADE PIC 999V99 VALUE 0.
+002900 01 TOTAL-GRADE PIC 9(5)V99 VALUE 0.
+003000 01 LETTER-GRADE PIC X.
+003100 01 I PIC 99.
+003200 01 J PIC 99.
+003300*This table will store the 5 possible grade values
+003400*Hint: We recommend using OCCURS Clause in the file record
+003500 01 POSSIBLE_GRADES PIC A OCCURS 5 TIMES.
+003600*Table storing the frequency of each letter grade
+003700 01 GRADE_FREQUENCIES PIC 9(4) VALUE 0 OCCURS 5 TIMES.
+003800*The name of the file (which will be retrieved from the user)
+003900 01 FILENAME PIC X(64).
+004000
+004100 PROCEDURE DIVISION.
+004200*MAIN Paragraph, execution starts here
+004300 MAIN.
+004400     PERFORM SET-GRADES.
+004500     DISPLAY "Enter the filename: " WITH NO ADVANCING.
+004600     ACCEPT FILENAME.
+004700     PERFORM GET-ENTRIES.
+004800     PERFORM DISPLAY-FREQUENCIES.
+004900     STOP RUN.
+005000
+005100*Repeatedly ask the user to enter the names of students
+005200*and process each valid student
+005300 GET-ENTRIES.
+005400     OPEN INPUT GRADES-FILE.
+005500     PERFORM WITH TEST AFTER UNTIL INPUT-NAME = "0"
+005600         DISPLAY "Enter student name (or 0 to quit): " 
+005700             WITH NO ADVANCING
+005800         ACCEPT INPUT-NAME
+005900         IF INPUT-NAME NOT = "0"
+006000             MOVE INPUT-NAME TO STUDENT-RECORD-NAME
+006100             PERFORM LOOKUP-STUDENT
+006200         END-IF
+006300     END-PERFORM.
+006400     CLOSE GRADES-FILE.
+006500
+006600*Process the record only if it is in the file
+006700 LOOKUP-STUDENT.
+006800     READ GRADES-FILE INTO STUDENT
+006900         KEY IS STUDENT-RECORD-NAME
+007000             INVALID KEY
+007100                 DISPLAY "Student not found: " INPUT-NAME
+007200             NOT INVALID KEY
+007300                 PERFORM PROCESS-RECORD
+007400     END-READ.
 007500
-007600*TODO: Create the DISPLAY-FREQUENCIES paragraph
-007700*Displays every letter grade and its corresponding frequency
-007800 DISPLAY-FREQUENCIES.
-007900
-008000*Initializes the array containing all possible letter grades
-008100 SET-GRADES.
-008200     MOVE "F" TO POSSIBLE_GRADES(1).
-008300     MOVE "D" TO POSSIBLE_GRADES(2).
-008400     MOVE "C" TO POSSIBLE_GRADES(3).
-008500     MOVE "B" TO POSSIBLE_GRADES(4).
-008600     MOVE "A" TO POSSIBLE_GRADES(5).
-
+007600*Calculates the average grade for the current student and
+007700*Updates the letter grade frequency
+007800 PROCESS-RECORD.
+007900     PERFORM AVERAGE.
+008000     DISPLAY "Average: " AVERAGE-GRADE "%".
+008100     PERFORM UPDATE-FREQUENCY.
+008200
+008300*Calculates the average grade for the current student
+008400 AVERAGE.
+008500     MOVE 0 TO TOTAL-GRADE.
+008600     PERFORM VARYING I FROM 1 BY 1 UNTIL I > 8
+008700         COMPUTE TOTAL-GRADE = TOTAL-GRADE + 
+008800             (STUDENT-GRADE-VALUES(I) / 100)
+008900     END-PERFORM.
+009000     COMPUTE AVERAGE-GRADE = TOTAL-GRADE / 8.
+009100
+009200*Updates the appropriate letter grade frequency
+009300 UPDATE-FREQUENCY.
+009400     IF AVERAGE-GRADE >= 90
+009500         MOVE "A" TO LETTER-GRADE
+009600         ADD 1 TO GRADE_FREQUENCIES(5)
+009700     ELSE IF AVERAGE-GRADE >= 80
+009800         MOVE "B" TO LETTER-GRADE
+009900         ADD 1 TO GRADE_FREQUENCIES(4)
+010000     ELSE IF AVERAGE-GRADE >= 70
+010100         MOVE "C" TO LETTER-GRADE
+010200         ADD 1 TO GRADE_FREQUENCIES(3)
+010300     ELSE IF AVERAGE-GRADE >= 60
+010400         MOVE "D" TO LETTER-GRADE
+010500         ADD 1 TO GRADE_FREQUENCIES(2)
+010600     ELSE
+010700         MOVE "F" TO LETTER-GRADE
+010800         ADD 1 TO GRADE_FREQUENCIES(1)
+010900     END-IF.
+011000
+011100*Displays every letter grade and its corresponding frequency
+011200 DISPLAY-FREQUENCIES.
+011300     DISPLAY "Grade Frequencies:".
+011400     PERFORM VARYING J FROM 1 BY 1 UNTIL J > 5
+011500         DISPLAY POSSIBLE_GRADES(J) ": " GRADE_FREQUENCIES(J)
+011600     END-PERFORM.
+011700
+011800*Initializes the array containing all possible letter grades
+011900 SET-GRADES.
+012000     MOVE "F" TO POSSIBLE_GRADES(1).
+012100     MOVE "D" TO POSSIBLE_GRADES(2).
+012200     MOVE "C" TO POSSIBLE_GRADES(3).
+012300     MOVE "B" TO POSSIBLE_GRADES(4).
+012400     MOVE "A" TO POSSIBLE_GRADES(5).
