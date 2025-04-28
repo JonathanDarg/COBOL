@@ -31,11 +31,11 @@
 003100 01 I PIC 99.
 003200 01 J PIC 99.
 003300*This table will store the 5 possible grade values
-003400*Hint: We recommend using OCCURS Clause in the file record
+003400*Hint: We recommend using OCCURS Clause in the file record        
 003500 01 POSSIBLE_GRADES PIC A OCCURS 5 TIMES.
 003600*Table storing the frequency of each letter grade
 003700 01 GRADE_FREQUENCIES PIC 9 OCCURS 5 TIMES.
-003800*The name of the file (which will be retrieved from the user)
+003800*The name of the file (which will be retrieved from the user)     
 003900 01 FILENAME PIC X(64).
 004000
 004100 PROCEDURE DIVISION.
@@ -53,7 +53,7 @@
 005300 GET-ENTRIES.
 005400     OPEN INPUT GRADES-FILE.
 005500     PERFORM WITH TEST AFTER UNTIL INPUT-NAME = "0"
-005600         DISPLAY "Enter student name (or 0 to quit): " 
+005600         DISPLAY "Enter student name (or 0 to quit): "
 005700             WITH NO ADVANCING
 005800         ACCEPT INPUT-NAME
 005900         IF INPUT-NAME NOT = "0"
@@ -99,22 +99,25 @@
 009100 AVERAGE.
 009200     MOVE 0 TO TOTAL-GRADE.
 009300     PERFORM VARYING I FROM 1 BY 1 UNTIL I > 8
-009400         COMPUTE TOTAL-GRADE = TOTAL-GRADE + 
+009400         COMPUTE TOTAL-GRADE = TOTAL-GRADE +
 009500             (STUDENT-GRADE-VALUES(I) / 100)
 009600     END-PERFORM.
 009700     COMPUTE AVERAGE-GRADE = TOTAL-GRADE / 8.
 009800
-011100*Displays every letter grade and its corresponding frequency
+011100*Displays every letter grade and its corresponding frequency      
 011200 DISPLAY-FREQUENCIES.
-011300     DISPLAY "Grade Frequencies:".
-011400     PERFORM VARYING J FROM 1 BY 1 UNTIL J > 5
-011500         DISPLAY POSSIBLE_GRADES(J) ": " GRADE_FREQUENCIES(J)
-011600     END-PERFORM.
-011700
-011800*Initializes the array containing all possible letter grades
+011300 DISPLAY "Grade Frequencies:".
+011400 DISPLAY "A: " GRADE_FREQUENCIES(5).
+011500 DISPLAY "B: " GRADE_FREQUENCIES(4).
+011600 DISPLAY "C: " GRADE_FREQUENCIES(3).
+011700 DISPLAY "D: " GRADE_FREQUENCIES(2).
+011800 DISPLAY "F: " GRADE_FREQUENCIES(1).
+011900
+011800*Initializes the array containing all possible letter grades      
 011900 SET-GRADES.
 008200     MOVE "F" TO POSSIBLE_GRADES(1).
 008300     MOVE "D" TO POSSIBLE_GRADES(2).
 008400     MOVE "C" TO POSSIBLE_GRADES(3).
 008500     MOVE "B" TO POSSIBLE_GRADES(4).
 008600     MOVE "A" TO POSSIBLE_GRADES(5).
+
